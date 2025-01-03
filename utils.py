@@ -9,13 +9,15 @@ from langchain_community.document_loaders.pdf import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_openai.chat_models import ChatOpenAI
+from langchain.prompts import PromptTemplate
 
 from dotenv import load_dotenv, find_dotenv
+
+from configs import get_config
 
 _ = load_dotenv(find_dotenv())
 
 PASTA_ARQUIVOS = Path(__file__).parent / 'arquivos'
-MODEL_NAME = 'gpt-3.5-turbo'
 
 def importacao_documentos():
     documentos = []
@@ -58,19 +60,24 @@ def cria_chain_conversa():
     documentos = split_de_documentos(documentos)
     vector_store = cria_vector_store(documentos)
 
-    chat = ChatOpenAI(model=MODEL_NAME)
+    chat = ChatOpenAI(model=get_config('model_name'))
     memory = ConversationBufferMemory(
         return_messages=True,
         memory_key='chat_history',
         output_key='answer',
     )
-    retriever = vector_store.as_retriever()
+    retriever = vector_store.as_retriever(
+        search_type=get_config('retrieval_search_type'),
+        search_kwargs=get_config('retrieval_kwargs')
+    )
+    prompt = PromptTemplate.from_template(get_config('prompt'))
     chat_chain = ConversationalRetrievalChain.from_llm(
         llm=chat,
         memory=memory,
         retriever=retriever,
         return_source_documents=True,
-        verbose=True
+        verbose=True,
+        combine_docs_chain_kwargs={'prompt': prompt}
     )
 
     st.session_state['chain'] = chat_chain

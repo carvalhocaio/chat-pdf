@@ -55,7 +55,6 @@ def chat_window():
         chain.invoke({'question': nova_mensagem})
         st.rerun()
 
-
 def main():
     with st.sidebar: sidebar()
     chat_window()
