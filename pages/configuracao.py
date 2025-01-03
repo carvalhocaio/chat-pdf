@@ -4,7 +4,7 @@ from configs import get_config
 from utils import PASTA_ARQUIVOS, cria_chain_conversa
 
 def config_page():
-    st.header('Página de configuração', divider=True)
+    st.header('Página de Configuração', divider=True)
 
     model_name = st.text_input('Modifique o modelo', value=get_config('model_name'))
     retrieval_search_type = st.text_input('Modifique o tipo de retrieval', value=get_config('retrieval_search_type'))
